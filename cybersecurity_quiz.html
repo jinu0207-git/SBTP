@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cybersecurity Quiz - Truth vs Fiction</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #22d3ee;
+        }
+
+        /* Progress Bar */
+        .progress-section {
+            margin-bottom: 30px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #334155;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #06b6d4 0%, #3b82f6 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        /* Score Display */
+        .score-display {
+            text-align: center;
+            margin-bottom: 30px;
+            background-color: #334155;
+            padding: 12px 24px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-left: 50%;
+            transform: translateX(-50%);
+            color: #22d3ee;
+            font-weight: bold;
+        }
+
+        /* Main Quiz Card */
+        .quiz-card {
+            background-color: #1e293b;
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .statement-label {
+            font-size: 0.85rem;
+            color: #22d3ee;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .statement {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        /* Answer Buttons */
+        .answer-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .answer-btn {
+            padding: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: 2px solid #475569;
+            border-radius: 12px;
+            background-color: #334155;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .answer-btn:hover:not(:disabled) {
+            background-color: #475569;
+            transform: scale(1.05);
+        }
+
+        .answer-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        /* Button States */
+        .answer-btn.selected-correct {
+            background-color: rgba(34, 197, 94, 0.3);
+            border-color: #22c55e;
+            color: #86efac;
+            transform: scale(1.05);
+        }
+
+        .answer-btn.selected-wrong {
+            background-color: rgba(239, 68, 68, 0.3);
+            border-color: #ef4444;
+            color: #fca5a5;
+            transform: scale(1.05);
+        }
+
+        .answer-btn.correct-answer {
+            background-color: rgba(34, 197, 94, 0.3);
+            border-color: #22c55e;
+            color: #86efac;
+        }
+
+        .answer-btn.wrong-answer {
+            background-color: rgba(107, 114, 128, 0.3);
+            border-color: #475569;
+            color: #9ca3af;
+            opacity: 0.5;
+        }
+
+        /* Feedback */
+        .feedback {
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feedback.correct {
+            background-color: rgba(34, 197, 94, 0.1);
+            border-color: #22c55e;
+            color: #86efac;
+        }
+
+        .feedback.wrong {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+            color: #fca5a5;
+        }
+
+        .feedback-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .feedback-text {
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Next Button */
+        .next-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #06b6d4 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .next-btn.show {
+            display: block;
+        }
+
+        .next-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(6, 182, 212, 0.4);
+        }
+
+        /* Results Screen */
+        .results-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .results-screen.show {
+            display: block;
+        }
+
+        .results-card {
+            background-color: #1e293b;
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            border-radius: 16px;
+            padding: 50px 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .results-emoji {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+
+        .results-title {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .results-score {
+            background-color: #0f172a;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .results-score-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #22d3ee;
+            margin-bottom: 10px;
+        }
+
+        .results-score-percent {
+            font-size: 1.5rem;
+            color: #22d3ee;
+            margin-bottom: 15px;
+        }
+
+        .results-message {
+            font-size: 1.1rem;
+            color: #cbd5e1;
+        }
+
+        .restart-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #06b6d4 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(6, 182, 212, 0.4);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
+
+            .quiz-card {
+                padding: 25px;
+                min-height: auto;
+            }
+
+            .statement {
+                font-size: 1.4rem;
+                margin-bottom: 30px;
+            }
+
+            .answer-buttons {
+                gap: 12px;
+            }
+
+            .answer-btn {
+                padding: 15px;
+                font-size: 1rem;
+            }
+
+            .results-card {
+                padding: 30px 20px;
+            }
+
+            .results-emoji {
+                font-size: 3.5rem;
+            }
+
+            .results-title {
+                font-size: 1.8rem;
+            }
+
+            .results-score-number {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🔒 Cybersecurity Quiz</h1>
+            <p>Truth vs Fiction</p>
+        </div>
+
+        <!-- Quiz Section -->
+        <div id="quizSection">
+            <!-- Progress Bar -->
+            <div class="progress-section">
+                <div class="progress-info">
+                    <span id="questionNumber">Question 1 of 20</span>
+                    <span id="progressPercent">5%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <!-- Score Display -->
+            <div class="score-display" id="scoreDisplay">Score: 0/0</div>
+
+            <!-- Quiz Card -->
+            <div class="quiz-card">
+                <div>
+                    <div class="statement-label">Statement</div>
+                    <p class="statement" id="statement">Loading...</p>
+                </div>
+
+                <div class="answer-buttons">
+                    <button class="answer-btn" id="trueBtn" onclick="answerQuestion(true)">✓ TRUE</button>
+                    <button class="answer-btn" id="falseBtn" onclick="answerQuestion(false)">✗ FALSE</button>
+                </div>
+            </div>
+
+            <!-- Feedback -->
+            <div class="feedback" id="feedback">
+                <div class="feedback-title" id="feedbackTitle"></div>
+                <div class="feedback-text" id="feedbackText"></div>
+            </div>
+
+            <!-- Next Button -->
+            <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next Question →</button>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="results-screen">
+            <div class="results-card">
+                <div class="results-emoji" id="resultsEmoji">🏆</div>
+                <h2 class="results-title">Quiz Complete!</h2>
+
+                <div class="results-score">
+                    <div class="results-score-number" id="finalScore">20/20</div>
+                    <div class="results-score-percent" id="finalPercent">100%</div>
+                    <p class="results-message" id="resultsMessage">Perfect! You're a cybersecurity expert!</p>
+                </div>
+
+                <button class="restart-btn" onclick="restartQuiz()">🔄 Try Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Questions Database
+        const questions = [
+            { statement: "Using the same password across all websites is convenient and safe.", answer: false, explanation: "If one site is breached, hackers can access all your accounts. Use unique, strong passwords for each site." },
+            { statement: "Phishing emails always contain obvious spelling errors and poor grammar.", answer: false, explanation: "Modern phishing emails look professional and authentic. They mimic real companies perfectly. Always verify sender email and hover over links before clicking." },
+            { statement: "Public Wi-Fi is safe to use for checking emails and browsing social media.", answer: false, explanation: "Public Wi-Fi is unencrypted. Hackers can intercept data. Use a VPN or avoid sensitive activities on public networks." },
+            { statement: "Two-factor authentication (2FA) adds an extra layer of security to your account.", answer: true, explanation: "Correct! 2FA requires a second verification method (OTP, fingerprint, etc). Even if password is stolen, account stays protected." },
+            { statement: "Antivirus software is enough to protect against all cyber threats.", answer: false, explanation: "Antivirus is just one layer. You also need firewalls, secure passwords, regular updates, and safe browsing habits." },
+            { statement: "Clicking 'Don't show this warning again' on security alerts is fine if you trust the site.", answer: false, explanation: "Security warnings exist for a reason. Disabling them removes important protections. Never ignore security prompts." },
+            { statement: "Ransomware encrypts your files and demands money for decryption keys.", answer: true, explanation: "Correct! Ransomware locks your data. Prevention is key: backup regularly, don't open suspicious attachments, keep software updated." },
+            { statement: "It's safe to use your birthdate and name in your password.", answer: false, explanation: "Personal info is easy to guess or find on social media. Use random combinations of uppercase, lowercase, numbers, and symbols." },
+            { statement: "Social engineering is a technical hack that requires coding skills.", answer: false, explanation: "Social engineering manipulates people through psychology — emails, calls, pretexting. It doesn't need technical skills, just human psychology." },
+            { statement: "A VPN hides your IP address and encrypts your internet traffic.", answer: true, explanation: "Correct! VPNs create secure tunnels for your data. Use them on public Wi-Fi, for privacy, and in restricted regions." },
+            { statement: "You should share your passwords with IT support staff for troubleshooting.", answer: false, explanation: "Legitimate support never asks for passwords. Use secure password reset processes instead. Your password is for you only." },
+            { statement: "Malware can only infect your computer through email attachments.", answer: false, explanation: "Malware spreads through infected websites, USB drives, downloads, software cracks, and compromised apps. Email is just one vector." },
+            { statement: "Updating your operating system patches known security vulnerabilities.", answer: true, explanation: "Correct! Updates fix bugs and security holes. Enable automatic updates. Hackers exploit unpatched systems." },
+            { statement: "A strong password should be at least 8 characters with uppercase, lowercase, numbers, and symbols.", answer: true, explanation: "Correct! Strong passwords are hard to crack. Longer passwords are better. Avoid dictionary words." },
+            { statement: "Clicking a link in a suspicious email won't harm you if you don't enter passwords.", answer: false, explanation: "Clicking can download malware or take you to fake sites. Don't click suspicious links, even to 'verify' or 'confirm' something." },
+            { statement: "Cybersecurity is only the IT department's responsibility.", answer: false, explanation: "Everyone must practice cybersecurity. Users are the first line of defense through secure behavior and awareness." },
+            { statement: "Using a password manager is risky because all passwords are stored in one place.", answer: false, explanation: "Password managers are secure vaults. They're safer than reusing passwords or writing them down. Use reputable managers (Bitwarden, 1Password)." },
+            { statement: "Disabling notifications from your bank app will prevent hacking.", answer: false, explanation: "Notifications alert you to suspicious activity. Keep them enabled to catch fraud early." },
+            { statement: "Zero-day vulnerabilities are security flaws unknown to the vendor.", answer: true, explanation: "Correct! Zero-day exploits exist before vendors know about them. They're dangerous but rare. Keep systems updated." },
+            { statement: "Public networks are labeled 'secure' if they require a password to connect.", answer: false, explanation: "Even password-protected public Wi-Fi isn't encrypted. A WPA3 or WPA2 home network is far more secure than any public network." }
+        ];
+
+        // State Variables
+        let currentIndex = 0;
+        let score = 0;
+        let answered = false;
+        let shuffledQuestions = [];
+
+        // Initialize Quiz
+        function initQuiz() {
+            shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+            currentIndex = 0;
+            score = 0;
+            answered = false;
+            loadQuestion();
+        }
+
+        // Load Current Question
+        function loadQuestion() {
+            const question = shuffledQuestions[currentIndex];
+            document.getElementById('statement').textContent = question.statement;
+            document.getElementById('questionNumber').textContent = `Question ${currentIndex + 1} of ${shuffledQuestions.length}`;
+            document.getElementById('scoreDisplay').textContent = `Score: ${score}/${currentIndex}`;
+            
+            // Update Progress
+            const progress = ((currentIndex + 1) / shuffledQuestions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
+
+            // Reset Button States
+            document.getElementById('trueBtn').className = 'answer-btn';
+            document.getElementById('falseBtn').className = 'answer-btn';
+            document.getElementById('trueBtn').disabled = false;
+            document.getElementById('falseBtn').disabled = false;
+            document.getElementById('feedback').classList.remove('show', 'correct', 'wrong');
+            document.getElementById('nextBtn').classList.remove('show');
+            answered = false;
+        }
+
+        // Handle Answer Selection
+        function answerQuestion(userAnswer) {
+            if (answered) return;
+            answered = true;
+
+            const question = shuffledQuestions[currentIndex];
+            const isCorrect = userAnswer === question.answer;
+
+            // Update Score
+            if (isCorrect) {
+                score++;
+            }
+
+            // Show Feedback
+            const feedbackDiv = document.getElementById('feedback');
+            feedbackDiv.classList.add('show');
+            
+            if (isCorrect) {
+                feedbackDiv.classList.add('correct');
+                document.getElementById('feedbackTitle').textContent = '✓ Correct!';
+            } else {
+                feedbackDiv.classList.add('wrong');
+                document.getElementById('feedbackTitle').textContent = '✗ Incorrect';
+            }
+            document.getElementById('feedbackText').textContent = question.explanation;
+
+            // Update Button States
+            const trueBtn = document.getElementById('trueBtn');
+            const falseBtn = document.getElementById('falseBtn');
+
+            trueBtn.disabled = true;
+            falseBtn.disabled = true;
+
+            if (userAnswer === true) {
+                if (isCorrect) {
+                    trueBtn.classList.add('selected-correct');
+                } else {
+                    trueBtn.classList.add('selected-wrong');
+                    if (question.answer === true) {
+                        falseBtn.classList.add('correct-answer');
+                    }
+                }
+            } else {
+                if (isCorrect) {
+                    falseBtn.classList.add('selected-correct');
+                } else {
+                    falseBtn.classList.add('selected-wrong');
+                    if (question.answer === false) {
+                        trueBtn.classList.add('correct-answer');
+                    }
+                }
+            }
+
+            // Show Next Button
+            document.getElementById('nextBtn').classList.add('show');
+        }
+
+        // Next Question
+        function nextQuestion() {
+            if (currentIndex < shuffledQuestions.length - 1) {
+                currentIndex++;
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        // Show Results
+        function showResults() {
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').classList.add('show');
+
+            const percentage = Math.round((score / shuffledQuestions.length) * 100);
+            document.getElementById('finalScore').textContent = `${score}/${shuffledQuestions.length}`;
+            document.getElementById('finalPercent').textContent = `${percentage}%`;
+
+            let emoji = '';
+            let message = '';
+
+            if (percentage === 100) {
+                emoji = '🏆';
+                message = "Perfect! You're a cybersecurity expert!";
+            } else if (percentage >= 80) {
+                emoji = '⭐';
+                message = 'Excellent! Strong cybersecurity knowledge!';
+            } else if (percentage >= 60) {
+                emoji = '👍';
+                message = 'Good! Keep learning to strengthen your skills.';
+            } else {
+                emoji = '📚';
+                message = 'Keep practicing! Cybersecurity takes time to master.';
+            }
+
+            document.getElementById('resultsEmoji').textContent = emoji;
+            document.getElementById('resultsMessage').textContent = message;
+        }
+
+        // Restart Quiz
+        function restartQuiz() {
+            document.getElementById('quizSection').style.display = 'block';
+            document.getElementById('resultsSection').classList.remove('show');
+            initQuiz();
+        }
+
+        // Start Quiz on Load
+        window.addEventListener('load', initQuiz);
+    </script>
+</body>
+</html>
